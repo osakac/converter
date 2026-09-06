@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
@@ -37,19 +37,17 @@
       <section class="panel">
         <div class="panel-fx" aria-hidden="true"></div>
 
-        <div class="field field--from" id="fieldFrom">
-          <div class="field-main">
-            <div class="amount-wrap">
-              <span class="symbol" id="fromSymbol" aria-hidden="true"></span>
-              <input
-                class="amount-input"
-                id="fromAmount"
-                type="text"
-                inputmode="decimal"
-                value="100"
-                aria-label="Сумма, которую отдаёте"
-              />
-            </div>
+        <div class="field field--from">
+          <div class="amount-wrap">
+            <span class="symbol" id="fromSymbol" aria-hidden="true"></span>
+            <input
+              class="amount-input"
+              id="fromAmount"
+              type="text"
+              inputmode="decimal"
+              value="100"
+              aria-label="Сумма, которую отдаёте"
+            />
           </div>
           <div
             class="select"
@@ -85,19 +83,17 @@
           </button>
         </div>
 
-        <div class="field field--to" id="fieldTo">
-          <div class="field-main">
-            <div class="amount-wrap">
-              <span class="symbol" id="toSymbol" aria-hidden="true"></span>
-              <input
-                class="amount-input to-field"
-                id="toAmount"
-                type="text"
-                inputmode="decimal"
-                value="0"
-                aria-label="Сумма, которую получаете"
-              />
-            </div>
+        <div class="field field--to">
+          <div class="amount-wrap">
+            <span class="symbol" id="toSymbol" aria-hidden="true"></span>
+            <input
+              class="amount-input"
+              id="toAmount"
+              type="text"
+              inputmode="decimal"
+              value="0"
+              aria-label="Сумма, которую получаете"
+            />
           </div>
           <div
             class="select"

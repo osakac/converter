@@ -224,33 +224,36 @@ function onCurrencyChange() {
 }
 
 function showError(msg, retryFn) {
+  errorBox.replaceChildren()
   if (!msg) {
-    errorBox.innerHTML = ''
     errorBox.style.display = 'none'
     return
   }
-  errorBox.innerHTML = ''
-  errorBox.appendChild(document.createTextNode(msg))
+  errorBox.append(msg)
   if (retryFn) {
     const btn = document.createElement('button')
     btn.className = 'retry'
     btn.textContent = 'Повторить'
-    btn.onclick = retryFn
-    errorBox.appendChild(document.createElement('br'))
-    errorBox.appendChild(btn)
+    btn.addEventListener('click', retryFn)
+    errorBox.append(document.createElement('br'), btn)
   }
   errorBox.style.display = 'block'
 }
 
+// Часы показывают только ЧЧ:ММ, поэтому просыпаемся ровно на смене
+// минуты: одно пробуждение в минуту вместо 60, и цифра меняется секунда
+// в секунду с системными часами, а не с задержкой до интервала.
 function tickClock() {
   const now = new Date()
   clock.textContent = now.toLocaleTimeString('ru-RU', {
     hour: '2-digit',
     minute: '2-digit',
   })
+  const msToNextMinute =
+    60000 - (now.getSeconds() * 1000 + now.getMilliseconds())
+  setTimeout(tickClock, msToNextMinute)
 }
 tickClock()
-setInterval(tickClock, 1000)
 
 async function fetchJSON(url, ms = 8000) {
   const ctrl = new AbortController()
@@ -270,14 +273,27 @@ async function fetchJSON(url, ms = 8000) {
   }
 }
 
+// Каждому запросу выдаём номер: если пока он летел, пользователь успел
+// сменить валюту, ответ на устаревший запрос молча выбрасывается — иначе
+// медленный ответ мог бы затереть более свежий курс.
+let rateRequestId = 0
+
+function setRateLine(base, target, rate) {
+  const value = document.createElement('span')
+  value.className = 'rate'
+  value.textContent = formatNumber(rate)
+  rateLine.replaceChildren(`1 ${base} = `, value, ` ${target}`)
+}
+
 async function fetchRate() {
   const base = fromSel.value
   const target = toSel.value
+  const reqId = ++rateRequestId
 
   if (base === target) {
     currentRate = 1
     strip.classList.remove('loading')
-    rateLine.innerHTML = `1 ${base} = 1 ${target}`
+    rateLine.textContent = `1 ${base} = 1 ${target}`
     dateLine.textContent = ''
     showError('')
     recompute()
@@ -291,15 +307,17 @@ async function fetchRate() {
   try {
     // GET /v2/rate/{base}/{quote} -> { date, base, quote, rate }
     const data = await fetchJSON(`${API}/rate/${base}/${target}`)
+    if (reqId !== rateRequestId) return
     currentRate = data.rate
-    rateLine.innerHTML = `1 ${base} = <span class="rate">${formatNumber(currentRate)}</span> ${target}`
+    setRateLine(base, target, currentRate)
     dateLine.textContent = data.date ? `на ${formatRuDate(data.date)}` : ''
     recompute()
   } catch (e) {
+    if (reqId !== rateRequestId) return
     rateLine.textContent = 'курс недоступен'
     showError('Не удалось получить курс: ' + e.message, fetchRate)
   } finally {
-    strip.classList.remove('loading')
+    if (reqId === rateRequestId) strip.classList.remove('loading')
   }
 }
 
@@ -310,11 +328,15 @@ function formatRuDate(isoDate) {
   return `${d}.${m}.${y}`
 }
 
+// Курс, в отличие от суммы, нельзя грубо округлять до 0,1: у пар вроде
+// RUB→USD (≈0,0115) это дало бы «0,1» — ошибка почти на порядок. Поэтому
+// для курсов меньше единицы оставляем больше знаков после запятой.
 function formatNumber(n) {
   if (n === null || n === undefined || isNaN(n)) return '—'
-  return round(n).toLocaleString('ru-RU', {
+  const digits = Math.abs(n) >= 1 ? 1 : 4
+  return n.toLocaleString('ru-RU', {
     minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
+    maximumFractionDigits: digits,
   })
 }
 
