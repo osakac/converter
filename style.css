@@ -765,23 +765,6 @@ body {
   height: 0;
 }
 
-/* Стрелка-подсказка: обозначает, что верхняя сумма перетекает в нижнюю.
-   Стоит под колонкой сумм, левее кнопки обмена, и не мешает ей. */
-.flow-arrow {
-  position: absolute;
-  left: 46px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-@media (max-width: 440px) {
-  .flow-arrow {
-    left: 38px;
-  }
-}
-
 .swap-btn {
   position: relative;
   width: 44px;
