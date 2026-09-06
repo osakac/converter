@@ -250,7 +250,7 @@ function tickClock() {
   })
 }
 tickClock()
-setInterval(tickClock, 30000)
+setInterval(tickClock, 1000)
 
 async function fetchJSON(url, ms = 8000) {
   const ctrl = new AbortController()
